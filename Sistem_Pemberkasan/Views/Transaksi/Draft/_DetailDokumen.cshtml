@@ -1,0 +1,397 @@
+﻿@model Sistem_Pemberkasan.Models.Transaksi.DraftVM.Detail
+@using System.Security.Claims
+@{
+    // Mendapatkan claims principal pengguna saat ini
+    var user = User as ClaimsPrincipal;
+
+    // Mendapatkan nilai ClaimTypes.Actor dari claims principal
+    var actorClaimValue = user?.FindFirst(ClaimTypes.Actor)?.Value;
+}
+
+@foreach (var item in Model.BerkasOne)
+{
+    <form asp-controller="Draft" asp-action="EditDraft" method="post" enctype="multipart/form-data" id="formUpload">
+        @Html.HiddenFor(x => x.NewRow.IdBerkas, new { value = Model.NewRow.IdBerkas })
+        @Html.HiddenFor(x => x.NewRow.IdKategoriBerkas, new { value = Model.NewRow.IdKategoriBerkas })
+
+        <div class="row g-2 mb-2">
+            <div class="col-md">
+                <div class="mb-3">
+                    <label for="floatingInputNoReferensi">No.Refrensi</label>
+                    @Html.TextBoxFor(x => x.NewRow.NoReferensi, new { @class = "form-control", @id = "floatingInputNoReferensi", @placeholder = "Input No Refrensi", value = item.NoReferensi, disabled = "disabled" })
+                </div>
+            </div>
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="floatingInputNop">NOP</label>
+                    @Html.TextBoxFor(x => x.NewRow.Nop, new { @class = "form-control", @id = "floatingInputNop", @placeholder = "Input NOP", value = item.Nop, disabled = "disabled" })
+                </div>
+            </div>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="floatingInputNamaPemohon">Nama Pemohon</label>
+                    @Html.TextBoxFor(x => x.NewRow.NamaPemohon, new { @class = "form-control", @id = "floatingInputNamaPemohon", @placeholder = "Nama Pemohon (Opsional)", value = item.NamaPemohon, disabled = "disabled" })
+                </div>
+            </div>
+            <div class="col-md ">
+                <div class=" mb-3">
+                    <label for="floatingInputAlamatPemohon">Alamat Pemohon</label>
+                    @Html.TextBoxFor(x => x.NewRow.AlamatPemohon, new { @class = "form-control", @id = "floatingInputAlamatPemohon", @placeholder = "Input Alamat Pemohon (Opsional)", value = item.AlamatPemohon, disabled = "disabled" })
+                </div>
+            </div>
+        </div>
+        <div class="row g-2 mb-2">
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="floatingInputNoTelpPemohon">No Telp Pemohon</label>
+                    @Html.TextBoxFor(x => x.NewRow.NoTelpPemohon, new { @class = "form-control", @id = "floatingInputNoTelpPemohon", @placeholder = "Input No Telp Pemohon (Opsional)", value = item.NoTelpPemohon, disabled = "disabled" })
+                </div>
+            </div>
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="floatingInputNoSk">No.SK</label>
+                    @Html.TextBoxFor(x => x.NewRow.NoSk, new { @class = "form-control", @id = "floatingInputNoSk", @placeholder = "Input No SK", value = item.NoSk, disabled = "disabled" })
+                </div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="floatingInputKeteranganPst">Keterangan</label>
+                    @Html.TextAreaFor(x => x.NewRow.KeteranganPst, new { @class = "form-control", @id = "floatingInputKeteranganPst", @placeholder = "Keterangan", value = item.KeteranganPst, rows = "4", style = "height: 100px;", disabled = "disabled" })
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div class="row mb-2">
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="floatingInputKategori">Kategori Berkas</label>
+                    @Html.TextBoxFor(x => x.NewRow.IdKategoriBerkasNavigation.JenisKategoriBerkas, new { @class = "form-control", @id = "floatingInputKategori", @placeholder = "Input No SK", value = Model.NewRow.IdKategoriBerkasNavigation.JenisKategoriBerkas, disabled = "disabled" })
+                </div>
+            </div>
+        </div>
+        <hr />
+        <div>
+
+            <div class="accordion custom-accordionwithicon accordion-fill-success" id="accordionFill">
+                @foreach (var (fiel, index) in Model.ListDokumen.Select((value, i) => (value, i + 1)))
+                {
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="accordionFillExample_@index">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accor_fill_@index" aria-expanded=@(index == 1 ? "true" : "false") aria-controls="accor_fill_@index">
+                                @fiel.IdDokumenNavigation.NamaDokumen
+                            </button>
+                        </h2>
+                        <div id="accor_fill_@index" class="accordion-collapse collapse " aria-labelledby="accordionFill_@index" data-bs-parent="#accordionFill">
+                            <div class="accordion-body">
+                                @*<iframe id="iframe" src="~/assets/berkas/@fiel.NamaDetailDokumen" width="100%" height="700"></iframe> *@
+                                <iframe id="iframe" src="@Url.Action("DownloadCompressedFile", "Draft", new { namaDetailDokumen = fiel.NamaDetailDokumen })" width="100%" height="700" id="iFrame"></iframe>
+
+                                @if (ViewContext.HttpContext.User.IsInRole("Pengelola") || ViewContext.HttpContext.User.IsInRole("Perekam"))
+                                {
+                                    <div class="row mt-3">
+                                        <label for="formFile">Ubah @fiel.IdDokumenNavigation.NamaDokumen</label>
+                                        <div class="col-9">
+                                            <input class="form-control formFile_@fiel.IdDokumen" type="file" id="formFile" name="files" accept=".pdf">
+                                        </div>
+                                        <div class="col-3">
+                                            <button type="button" onclick="previewPDF(@fiel.IdDokumen)" class="btn btn-primary">Pratinjau PDF</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <hr />
+                }
+            </div>
+
+            @if (ViewContext.HttpContext.User.IsInRole("Pengelola") || (ViewContext.HttpContext.User.IsInRole("Perekam") && actorClaimValue == item.IdKategoriBerkasNavigation.IdBidangNavigation.NamaBidang))
+            {
+
+                <div class="hstack gap-2 justify-content-between mt-4">
+                    @if (item.StatusBerkas == 1)
+                    {
+
+                        <div>
+                            <button type="button" class="btn btn-success me-2" onclick="checkSaveEditCheck()" id="btnPerubahan"><div><i class="ri-delete-bin-line mt-1"></i></div>Simpan Perubahan Berkas</button>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-danger me-2" onclick="checkUpdateStatus(@item.IdBerkas,0)"><div><i class="ri-delete-bin-line mt-1"></i></div>Hapus Berkas</button>
+                            <button type="button" class="btn btn-primary " onclick="checkUpdateStatus(@item.IdBerkas,2)"><div><i class="ri-send-plane-2-fill mt-1"></i></div>Simpan Berkas</button>
+                        </div>
+                    }
+                    else if (item.StatusBerkas == 2)
+                    {
+                        <div>
+                            <button type="button" class="btn btn-success me-2" onclick="checkUpdateStatus(@item.IdBerkas,3)"><div><i class="ri-restart-line mt-1"></i></div>Restore Berkas</button>
+                        </div>
+                    }
+                    else if (item.StatusBerkas == 3)
+                    {
+                        <div>
+                            <button type="button" class="btn btn-success me-2" onclick="checkSaveEditCheck()" id="btnPerubahan"><div><i class="ri-delete-bin-line mt-1"></i></div>Simpan Perubahan Berkas</button>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-danger me-2" onclick="checkUpdateStatus(@item.IdBerkas,0)"><div><i class="ri-delete-bin-line mt-1"></i></div>Hapus Berkas</button>
+                            <button type="button" class="btn btn-primary " onclick="checkUpdateStatus(@item.IdBerkas,2)"><div><i class="ri-send-plane-2-fill mt-1"></i></div>Simpan Berkas</button>
+                        </div>
+                    }
+                    else if (item.StatusBerkas == 4)
+                    {
+                        <div>
+                            <button type="button" class="btn btn-success me-2" onclick="checkSaveEditCheck()" id="btnPerubahan"><div><i class="ri-delete-bin-line mt-1"></i></div>Simpan Perubahan Berkas</button>
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-danger me-2" onclick="checkUpdateStatus(@item.IdBerkas,0)"><div><i class="ri-delete-bin-line mt-1"></i></div>Hapus Berkas</button>
+                            <button type="button" class="btn btn-primary " onclick="checkUpdateStatus(@item.IdBerkas,2)"><div><i class="ri-send-plane-2-fill mt-1"></i></div>Simpan Berkas</button>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <button type="button" class="btn btn-success me-2" onclick="checkUpdateStatus(@item.IdBerkas,1)"><div><i class="ri-restart-line mt-1"></i></div>Restore Berkas</button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </form>
+
+}
+@if (ViewContext.HttpContext.User.IsInRole("Pengelola") || ViewContext.HttpContext.User.IsInRole("Perekam"))
+{
+
+    <script>
+        $(document).ready(function () {
+            $('input').prop('disabled', false);
+            $('textarea').prop('disabled', false);
+            $('#floatingInputKategori').prop('disabled', true);
+        });
+    </script>
+}
+
+<script>
+
+    $(document).ready(function () {
+        // Simpan nilai awal dari setiap elemen input
+        var initialValues = {};
+        $('input[type="text"], textarea').each(function () {
+            initialValues[$(this).attr('id')] = $(this).val();
+        });
+
+        // Memantau perubahan pada setiap elemen input
+        $('input[type="text"], textarea').on('input', function () {
+            var id = $(this).attr('id');
+            // Bandingkan nilai saat ini dengan nilai awal
+            if ($(this).val() !== initialValues[id]) {
+                $('#btnPerubahan').show(); // Tombol simpan ditampilkan jika ada perubahan
+            } else {
+                $('#btnPerubahan').hide(); // Tombol simpan disembunyikan jika tidak ada perubahan
+            }
+        });
+
+
+
+        // Sembunyikan tombol simpan saat halaman dimuat
+        $('#btnPerubahan').hide();
+    });
+
+
+
+    $('#iframe').load(function () {
+        $(this).height($(this).contents().height());
+        $(this).width($(this).contents().width());
+    });
+    async function checkSaveEditCheck() {
+        const { value: accept } = await Swal.fire({
+            title: "Periksa Kembali Inputan Anda",
+            input: "checkbox",
+            inputValue: 1,
+            inputPlaceholder: `
+                            Inputan Saya Sudah Benar
+                          `,
+            confirmButtonText: `
+                            Continue&nbsp;<i class="fa fa-arrow-right"></i>
+                          `,
+            inputValidator: (result) => {
+                return !result && "Sudah Yakin Dengan Inputan Anda?";
+            }
+        });
+        if (accept) {
+            EditData()
+        }
+    }
+    function checkUpdateStatus(idBerkas, aksi) {
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success ms-2",
+                cancelButton: "btn btn-danger me-2"
+            },
+            buttonsStyling: false
+        });
+        swalWithBootstrapButtons.fire({
+            title: "Apa kamu yakin ?",
+            text: "Yakin Mengirim Dokumen",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya , Tentu!",
+            cancelButtonText: "Jangan, Batalkan!",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                updateStatus(idBerkas, aksi);
+                swalWithBootstrapButtons.fire({
+                    title: "Sukses!",
+                    text: "File Sudah Sukses Terkirim !.",
+                    icon: "success"
+                });
+            } else if (
+                /* Read more about handling dismissals below */
+                result.dismiss === Swal.DismissReason.cancel
+            ) {
+                swalWithBootstrapButtons.fire({
+                    title: "Batal",
+                    text: "File Batal Dikirim ! ",
+                    icon: "error"
+                });
+            }
+        });
+    }
+
+    function updateStatus(idBerkas, aksi) {
+
+        $.ajax({
+            type: "GET",
+            data: { 'IdBerkas': idBerkas, 'Aksi': aksi },
+            url: '@Url.Action("StatusChange", "Draft")',
+            success: function (resp) {
+                if (resp.status == 1) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<b>Info</b>',
+                        text: resp.message,
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                }
+            }
+        });
+    }
+
+
+    function checkSaveEdit() {
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success ms-2",
+                cancelButton: "btn btn-danger me-2"
+            },
+            buttonsStyling: false
+        });
+        swalWithBootstrapButtons.fire({
+            title: "Apa kamu yakin ?",
+            text: "Yakin Untuk Mengedit Berkas",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya , Tentu!",
+            cancelButtonText: "Jangan, Batalkan!",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                EditData()
+                swalWithBootstrapButtons.fire({
+                    title: "Sukses!",
+                    text: "File Sudah Sukses Diedit !.",
+                    icon: "success"
+                });
+            } else if (
+                /* Read more about handling dismissals below */
+                result.dismiss === Swal.DismissReason.cancel
+            ) {
+                swalWithBootstrapButtons.fire({
+                    title: "Batal",
+                    text: "File Batal Dikirim ! ",
+                    icon: "error"
+                });
+            }
+        });
+    }
+
+    function EditData() {
+        var formData = new FormData($("#formUpload")[0]);
+        formData.append('files', formFile);
+
+        var t = $("input[name='__RequestVerificationToken']").val();
+
+        $.ajax({
+            url: $("#formUpload").attr('action'),
+            type: "POST",
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            processData: false,
+            headers:
+            {
+                "RequestVerificationToken": t
+            },
+
+            beforeSend: function () {
+                $("#loader").show()
+
+            },
+            complete: function () { $("#loader").hide(); },
+            success: function (resp) {
+                if (resp.status == 1) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<b>Info</b>',
+                        text: resp.message,
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                }
+            }
+        })
+    }
+    function previewPDF(namaFile) {
+        // Mendapatkan elemen input file berdasarkan ID
+        var fileInput = $('.formFile_' + namaFile).get(0);
+
+        console.log(fileInput)
+        // Mendapatkan file yang dipilih oleh pengguna
+        var file = fileInput.files[0];
+
+        if (file) {
+            // Membuat URL objek untuk file yang dipilih
+            var fileURL = URL.createObjectURL(file);
+
+            // Membuka URL objek dalam tab baru
+            window.open(fileURL, '_blank');
+        } else {
+            console.log('Tidak ada file yang dipilih.');
+        }
+    }
+
+</script>
+
+
+

@@ -1,0 +1,78 @@
+﻿@using System.Globalization
+@model Sistem_Pemberkasan.Models.Transaksi.DraftVM.Index
+
+<table id="tbl" class="table table-hover table-bordered table-striped align-middle w-100">
+    <thead >
+        <tr>
+            <th class="text-center" scope="col">NOP</th>
+            <th class="text-center" scope="col">No Referensi</th>
+            <th class="text-center" scope="col">Tanggal</th>
+            <th class="text-center" scope="col">Bidang</th>
+            <th class="text-center" scope="col">Kategori</th>
+            <th class="text-center" scope="col">Status</th>
+            <th class="text-center"  scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.BerkasList)
+        {
+            @if (item.StatusBerkas != 2)
+            {
+                <tr>
+                    <td scope="col">@item.Nop</td>
+                    <td scope="col">@item.NoReferensi</td>
+                    <td scope="col">@(item.TanggalUnggah.HasValue ? item.TanggalUnggah.Value.ToString("dd MMMM yyyy",new CultureInfo("id-ID")):"" )</td>
+                    <td scope="col">@item.IdKategoriBerkasNavigation.IdBidangNavigation.NamaBidang</td>
+                    <td scope="col">@item.IdKategoriBerkasNavigation.JenisKategoriBerkas</td>
+                    <td scope="col" class="text-center">
+                        @if (@item.StatusBerkas == 1)
+                        {
+                            <div>
+                                <span class="badge bg-primary">Draft</span>
+                            </div>
+                        }
+                        else if (@item.StatusBerkas == 2)
+                        {
+                            <div>
+                                <span class="badge bg-success">Tersimpan</span>
+                            </div>
+                        }
+                        else if (@item.StatusBerkas == 3)
+                        {
+                            <div>
+                                <span class="badge bg-warning">Belum Direvisi</span>
+                            </div>
+                        }
+                        else if (@item.StatusBerkas == 4)
+                        {
+                            <div>
+                                <span class="badge bg-secondary">Sudah Direvisi</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                <span class="badge bg-danger">Dihapus</span>
+                            </div>
+                        }
+                    </td>
+                    <td>
+                        <div class="d-flex g-2 justify-content-center">
+                            <button type="button" class="btn btn-secondary me-2" onclick="detailDokumen(@item.IdBerkas ,@item.IdKategoriBerkas)"><div><i class="ri-share-box-line"></i></div>Detail</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        // Inisialisasi DataTable
+        var table = $('#tbl').DataTable({
+            responsive: true,
+            "ordering": false
+        });
+    });
+</script>

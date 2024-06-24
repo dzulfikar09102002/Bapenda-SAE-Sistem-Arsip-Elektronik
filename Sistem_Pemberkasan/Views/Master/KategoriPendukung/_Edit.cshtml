@@ -1,0 +1,72 @@
+﻿@model Sistem_Pemberkasan.Models.Master.PendukungVM.Edit
+<div class="row">
+    <div class="col-12 mb-3">
+
+        <form id="frmUpdate" class="needs-validation" novalidate asp-controller="KategoriPendukung" asp-action="updatePendukung" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="Ket" class="form-label required-star">Nama Kategori Pendukung</label>
+                    @Html.TextBoxFor(x => x.KategoriPendukungRow.NamaKategoriPendukungBerkas, new { @class = "form-control", placeholder = "Edit Nama Kategori Pendukung" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="Status" class="form-label required-star">Status</label>
+                    @Html.DropDownListFor(x => x.KategoriPendukungRow.StatusKategoriPendukung,
+                             new List<SelectListItem>
+                    {
+                    new SelectListItem { Text = "Active", Value = "1" },
+                    new SelectListItem { Text = "Non-active", Value = "2" }
+                    }, "Pilih Status", new { @class = "form-select" })
+                </div>
+            </div>
+        </form>
+
+    </div>
+    <div class="hstack gap-2 justify-content-end">
+        <button type="button" class="btn btn-danger" id="btn-tutup-event" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-success" id="btn-save-event" onclick="fnUpdate()">Simpan</button>
+    </div>
+</div>
+<script>
+    function fnUpdate() {
+        var formData = new FormData($("#frmUpdate")[0]);
+        var t = $("input[name='__RequestVerificationToken']").val();
+
+        $.ajax({
+            url: $("#frmUpdate").attr('action'),
+            type: "POST",
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            processData: false,
+            headers:
+            {
+                "RequestVerificationToken": t
+            },
+            beforeSend: function () {
+                $("#loader").show()
+            },
+            complete: function () { $("#loader").hide(); },
+            success: function (resp) {
+                if (resp.status == 1) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<b>Info</b>',
+                        text: resp.message,
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                }
+            }
+        })
+
+    }
+</script>

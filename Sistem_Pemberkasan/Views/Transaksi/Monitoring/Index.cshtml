@@ -1,0 +1,388 @@
+﻿@model Sistem_Pemberkasan.Models.Transaksi.MonitoringVM.Index
+@{
+    ViewData["Title"] = "Monitoring";
+}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h2 class="mb-sm-0">Monitoring Dokumen</h2>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Master</a></li>
+                    <li class="breadcrumb-item active">Monitoring Dokumen</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+@* <div class="row">
+    <div class="col-6 mb-3"></div>
+    <div class="col-6 mb-3">
+        <form asp-controller="Monitoring" asp-action="Search" method="post" class="d-flex">
+
+            @Html.TextBoxFor(x => x.SearchBox, new { @class = "form-control", @id = "search", @placeholder = "Cari Nama Pemohon / NOP" })
+
+            <button type="button" onclick="Search()" class="btn btn-primary ms-2">Cari</button>
+        </form>
+    </div>
+</div> *@
+
+
+<div class="card">
+    <div class="card-body">
+        <form asp-controller="Monitoring" asp-action="Filter" method="post" enctype="multipart/form-data" id="formFilter">
+            <div class="d-lg-flex">
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatingBidang">Bidang</label>
+                    @Html.DropDownListFor(m => m.IdBidang, new SelectList(Model.FilterBidang, "IdBidang", "NamaBidang"), "Pilih Bidang", new
+                        { @class = "form-select", @id = "floatingBidang" })
+                </div>
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatingKategori">Kategori</label>
+                    @Html.DropDownListFor(m => m.IdKategori, new SelectList(Model.FilterKategori, "IdKategoriBerkas", "JenisKategoriBerkas"), "Pilih Kategori", new
+                        { @class = "form-select", @id = "floatingKategori" })
+                </div>
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatTanggalMulai">Tanggal Mulai</label>
+                    @Html.TextBoxFor(m => m.tanggalMulai, DateTime.Now.AddYears(-1).ToString("yyyy-MM-ddTHH:mm"), new { @class = "form-control", type = "datetime-local", @id = "floatTanggalMulai" })
+                </div>
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatTanggalAkhir">Tanggal Akhir</label>
+                    @Html.TextBoxFor(m => m.tanggalAkhir, DateTime.Now.ToString("yyyy-MM-ddTHH:mm"), new { @class = "form-control", type = "datetime-local", @id = "floatTanggalAkhir" })
+                </div>
+
+
+                <div class="d-flex flex-fill flex-column justify-content-end">
+                    <button type="button" onclick="Filter()" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="card mt-2">
+    <div class="card-body table-responsive">
+        <!-- Striped Rows -->
+        <div class="table-responsive" id="table">
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#monitorActive').addClass('active');
+            $('#tbl').DataTable({
+                responsive: true,
+                searching: true
+            });
+            $(window).keydown(function (event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+
+            Filter();
+           
+          
+
+            // Mendapatkan elemen input berdasarkan ID
+            var inputTanggalMulai = document.getElementById('floatTanggalMulai');
+            var inputTanggalAkhir = document.getElementById('floatTanggalAkhir');
+
+            // Mendapatkan tanggal hari ini
+            var today = new Date();
+            var year = today.getFullYear();
+            var month = (today.getMonth() + 1).toString().padStart(2, '0'); // Tambahkan nol di depan jika bulan < 10
+            var day = today.getDate().toString().padStart(2, '0'); // Tambahkan nol di depan jika tanggal < 10
+
+            // Format tanggal dan waktu sesuai dengan format input date
+            var formattedDate = year + '-' + month + '-' + day;
+            // Set nilai default pada input date
+            inputTanggalMulai.value = formattedDate;
+            inputTanggalAkhir.value = formattedDate;
+
+            function getDataFileForm(id_kategori_berkas) {
+
+                var t = $("input[name='__RequestVerificationToken']").val();
+                $.ajax({
+                    url: '@(Url.Action("filterKategori", "Monitoring"))',
+                    type: "GET",
+                    data: { idKategori: id_kategori_berkas },
+                    headers:
+                    {
+                        "RequestVerificationToken": t
+                    },
+                    beforeSend: function () {
+                        $("#loader").show()
+                        $('#tableMonitor').hide();
+                    },
+                    complete: function () { $("#loader").hide(); },
+                    success: function (resp) {
+                        if (resp.status == undefined) {
+                            $('#tableMonitor').show();
+                            $('#tableMonitor').html(resp);
+                            $("#loader").hide()
+                        }
+                        else {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: '<b style="color:orange">Peringatan</b>',
+                                text: resp.message,
+                            })
+                            $("#loader").hide()
+                        }
+                    }
+                })
+            }
+        });
+        function Filter() {
+            // var formData = new FormData($("#formFilter")[0]);
+            var formData = new FormData();
+            var tanggalMulai = $('#floatTanggalMulai').val();
+            var tanggalAkhir = $('#floatTanggalAkhir').val();
+            var IdBidang = $('#floatingBidang').val();
+            var IdKategori = $('#floatingKategori').val();
+
+            var t = $("input[name='__RequestVerificationToken']").val();
+     
+            $.ajax({
+                type: "POST",
+                data: {
+                    tanggalMulai,
+                    tanggalAkhir,
+                    IdBidang,
+                    IdKategori,
+                },
+                url: '@Url.Action("Filter")',
+                headers:
+                {
+                    "RequestVerificationToken": t
+                },
+                beforeSend: function () {
+                    $("#loader").show()
+                },
+                complete: function () { $("#loader").hide(); },
+                success: function (resp) {
+                    if (resp.status == undefined) {
+                        $("#loader").hide();
+                        $("#tableNofilter").hide();
+                        $('#table').show();
+                        $('#table').html(resp);
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: resp.message,
+                        })
+                        $("#loader").hide()
+                    }
+                }
+            });
+
+        }
+        function Search() {
+            // var formData = new FormData($("#formFilter")[0]);
+            var formData = new FormData();
+            var SearchBox = $('#search').val();
+
+            var t = $("input[name='__RequestVerificationToken']").val();
+            console.log(formData)
+            $.ajax({
+                type: "POST",
+                data: {
+                    SearchBox
+                },
+                url: '@Url.Action("Search")',
+                headers:
+                {
+                    "RequestVerificationToken": t
+                },
+                beforeSend: function () {
+                    $("#loader").show()
+                },
+                complete: function () { $("#loader").hide(); },
+                success: function (resp) {
+                    if (resp.status == undefined) {
+                        $("#loader").hide();
+                        $("#tableNofilter").hide();
+                        $('#table').show();
+                        $('#table').html(resp);
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: resp.message,
+                        })
+                        $("#loader").hide()
+                    }
+                }
+            });
+
+        }
+        function detailTersimpan(id_berkas, noRev) {
+            $.ajax({
+                type: "GET",
+                data: { IdBerkas: id_berkas, NoRev: noRev },
+                url: '@Url.Action("DetailDokumen", "Monitoring")',
+                success: function (data) {
+                    if (data.Status === undefined) {
+                        $("#staticBackdrop .modal-dialog").addClass("modal-dialog-centered modal-dialog-scrollable");
+                        $("#staticBackdrop .modal-dialog").addClass("modal-lg");
+                        $("#staticBackdrop .modal-title").html("Detail Berkas");
+                        $("#staticBackdrop .modal-body").html(data);
+                        $("#staticBackdrop").modal('show');
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: data.Message
+                        });
+                    }
+                }
+            });
+        }
+
+        function addPendukung(id_berkas, noRev) {
+            $.ajax({
+                type: "GET",
+                data: { IdBerkas: id_berkas, NoRev: noRev },
+                url: '@Url.Action("AddPendukung", "Monitoring")',
+                success: function (data) {
+                    if (data.Status === undefined) {
+                        $("#staticBackdrop .modal-dialog").addClass("modal-dialog-centered modal-dialog-scrollable");
+                        $("#staticBackdrop .modal-dialog").addClass("modal-lg");
+                        $("#staticBackdrop .modal-title").html("Tambah Penanda");
+                        $("#staticBackdrop .modal-body").html(data);
+                        $("#staticBackdrop").modal('show');
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: data.Message
+                        });
+                    }
+                }
+            });
+        }
+
+        function editPendukung(id_berkas) {
+            $.ajax({
+                type: "GET",
+                data: { IdBerkas: id_berkas},
+                url: '@Url.Action("EditPendukung", "Monitoring")',
+                success: function (data) {
+                    if (data.Status === undefined) {
+                        $("#staticBackdrop .modal-dialog").addClass("modal-dialog-centered modal-dialog-scrollable");
+                        $("#staticBackdrop .modal-dialog").addClass("modal-lg");
+                        $("#staticBackdrop .modal-title").html("Edit Penanda");
+                        $("#staticBackdrop .modal-body").html(data);
+                        $("#staticBackdrop").modal('show');
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: data.Message
+                        });
+                    }
+                }
+            });
+        }
+
+        function EditData(id) {
+            var formData = new FormData($("#FormPendukung-" + id)[0]);
+            formData.append('file', $("#FloatingFile-" + id)[0]);
+            formData.append('idPendukung', id);
+
+            var t = $("input[name='__RequestVerificationToken']").val();
+
+            $.ajax({
+                url: $("#FormPendukung-" + id).attr('action'),
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+                headers: {
+                    "RequestVerificationToken": t
+                },
+                beforeSend: function () {
+                    $("#loader").show();
+                },
+                complete: function () { $("#loader").hide(); },
+                success: function (resp) {
+                    if (resp.status == 1) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '<b>Info</b>',
+                            text: resp.message,
+                        }).then((result) => {
+                            window.location.reload();
+                        })
+                    } else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: resp.message,
+                        });
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error(xhr.responseText);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Ada kesalahan dalam memproses permintaan.',
+                    });
+                }
+            });
+        }
+
+        function saveEditPendukung(id) {
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-success ms-2",
+                    cancelButton: "btn btn-danger me-2"
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Apa kamu yakin ?",
+                text: "Yakin Untuk Mengedit Berkas",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Ya , Tentu!",
+                cancelButtonText: "Jangan, Batalkan!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    EditData(id);
+                    swalWithBootstrapButtons.fire({
+                        title: "Sukses!",
+                        text: "File Sudah Sukses Diedit !.",
+                        icon: "success"
+                    });
+                } else if (result.dismiss === Swal.DismissReason.cancel) {
+                    swalWithBootstrapButtons.fire({
+                        title: "Batal",
+                        text: "File Batal Dikirim ! ",
+                        icon: "error"
+                    });
+                }
+            });
+        }
+    </script>
+}

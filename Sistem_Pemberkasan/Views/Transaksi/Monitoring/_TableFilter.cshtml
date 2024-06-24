@@ -1,0 +1,78 @@
+﻿@using System.Globalization
+@model Sistem_Pemberkasan.Models.Transaksi.MonitoringVM.Index
+@{
+    HashSet<string> uniqueValues = new HashSet<string>();
+}
+<table id="tbl" class="w-100 table table-bordered dt-responsive nowrap table-striped table-hover align-middle dataTable no-footer dtr-inline collapsed">
+    <thead>
+        <tr>
+            <th scope="col" class="text-center">NOP</th>
+            <th scope="col" class="text-center">No Referensi</th>
+            <th scope="col" class="text-center">Tanggal</th>
+            <th scope="col" class="text-center">Bidang</th>
+            <th scope="col" class="text-center">Kategori</th>
+            <th scope="col" class="text-center">Kategori Pendukung</th>
+            <th scope="col" class="text-center">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var (item, index) in Model.BerkasList.Select((value, i) => (value, i)))
+        {
+            <tr>
+                <td scope="col">@item.Nop</td>
+                <td scope="col">@item.NoReferensi</td>
+                <td scope="col">@(item.TanggalUnggah.HasValue ? item.TanggalUnggah.Value.ToString("dd MMMM yyyy", new CultureInfo("id-ID")) : "")</td>
+                <td scope="col">@item.IdKategoriBerkasNavigation.IdBidangNavigation.NamaBidang</td>
+                <td scope="col">@item.IdKategoriBerkasNavigation.JenisKategoriBerkas</td>
+
+                @if (item.PendukungBerkas.Count <= 0)
+                {
+                    <td scope="col">
+                        <div class="d-flex flex-column">
+                            <div class="badge bg-success mb-1">Tidak Ada Dokumen Pendukung</div>
+                        </div>
+                    </td>
+                }
+                else
+                {
+                    <td scope="col">
+                        <div class="d-flex flex-column">
+                            @foreach (var pendukung in item.PendukungBerkas.Where(x => x.StatusPendukungBerkas == 1))
+                            {
+                                if (!uniqueValues.Contains(pendukung.IdKategoriPendukungBerkasNavigation.NamaKategoriPendukungBerkas))
+                                {
+                                    uniqueValues.Add(pendukung.IdKategoriPendukungBerkasNavigation.NamaKategoriPendukungBerkas);
+                                    <div class="badge bg-danger mb-1">@pendukung.IdKategoriPendukungBerkasNavigation.NamaKategoriPendukungBerkas</div>
+                                }
+                            }
+                        </div>
+                    </td>
+                }
+                <td>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary me-2" onclick="detailTersimpan(@item.IdBerkas ,@item.IdKategoriBerkas)"><div><i class="ri-share-box-line"></i></div><span>Detail</span></button>
+                        @if (ViewContext.HttpContext.User.IsInRole("Pengelola") || ViewContext.HttpContext.User.IsInRole("Perekam"))
+                        {
+                            <button type="button" class="btn btn-info me-2" onclick="addPendukung(@item.IdBerkas ,@item.IdKategoriBerkas)"><div><i class="ri-file-add-line"></i></div>Tambah Penanda</button>
+                            @if (item.PendukungBerkas.Count != 0)
+                            {
+                                <button type="button" class="btn btn-success me-2" onclick="editPendukung(@item.IdBerkas ,@item.IdKategoriBerkas)"><div><i class="ri-file-edit-line"></i></div>Edit Penanda</button>
+                            }
+                        }
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    $(document).ready(function () {
+        // Inisialisasi DataTable
+        var table = $('#tbl').DataTable({
+            responsive: true,
+            "ordering": false
+        });
+
+    });
+</script>

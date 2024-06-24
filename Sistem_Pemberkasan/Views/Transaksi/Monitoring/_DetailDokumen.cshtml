@@ -1,0 +1,274 @@
+﻿@model Sistem_Pemberkasan.Models.Transaksi.MonitoringVM.Detail
+@using System.Security.Claims
+@{
+    // Mendapatkan claims principal pengguna saat ini
+    var user = User as ClaimsPrincipal;
+
+    // Mendapatkan nilai ClaimTypes.Actor dari claims principal
+    var actorClaimValue = user?.FindFirst(ClaimTypes.Actor)?.Value;
+}
+@foreach (var item in Model.BerkasOne)
+{
+    <div class="row g-2 mb-2">
+        <div class="col-md">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInputGrid" name="No_Refrensi" value="@item.NoReferensi" disabled>
+                <label for="floatingInputGrid">No.Refrensi</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInputGrid" value="@item.Nop" name="NOP" disabled>
+                <label for="floatingInputGrid">NOP</label>
+            </div>
+        </div>
+    </div>
+    <div class="row g-2 mb-2">
+        <div class="col-md">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInputGrid" name="Nama_Pemohon" value="@item.NamaPemohon" disabled>
+                <label for="floatingInputGrid">Nama Pemohon</label>
+            </div>
+        </div>
+        <div class="col-md ">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInputGrid" name="Alamat_Pemohon" value="@item.AlamatPemohon" disabled>
+                <label for="floatingInputGrid">Alamat</label>
+            </div>
+        </div>
+    </div>
+    <div class="row g-2 mb-2">
+        <div class="col-md">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInputGrid" value="@item.NoTelpPemohon" name="No_Telp" disabled>
+                <label for="floatingInputGrid">No.Telp</label>
+            </div>
+        </div>
+        <div class="col-md">
+            <div class="form-floating">
+                <input type="number" class="form-control" id="floatingInputGrid" value="@item.NoSk" name="No_SK" disabled>
+                <label for="floatingInputGrid">No.SK</label>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md">
+            <div class="form-floating">
+                <textarea class="form-control text-start" style="height: 100px" id="floatingInputGrid" disabled>@item.KeteranganPst</textarea>
+                <label for="floatingInputGrid">Keterangan PST</label>
+            </div>
+        </div>
+    </div>
+    <hr />
+
+    <div class="row mb-2">
+        <div class="col-md">
+            <div class="form-floating">
+                <input type="text" class="form-control" id="floatingInputGrid" value="@item.IdKategoriBerkasNavigation.JenisKategoriBerkas" disabled>
+                <label for="floatingInputGrid">Kategori Dokumen</label>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    <div>
+        <div class="accordion custom-accordionwithicon accordion-fill-success" id="accordionFill">
+            @foreach (var (fiel, index) in Model.ListDokumen.Select((value, i) => (value, i + 1)))
+            {
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="accordionFillExample_@index">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#accor_fill_@index" aria-expanded=@(index == 1 ? "true" : "false") aria-controls="accor_fill_@index">
+                            @fiel.IdDokumenNavigation.NamaDokumen
+                        </button>
+                    </h2>
+                    <div id="accor_fill_@index" class="accordion-collapse collapse " aria-labelledby="accordionFill_@index" data-bs-parent="#accordionFill">
+                        <div class="accordion-body">
+                            <iframe id="iframe" src="@Url.Action("DownloadCompressedFile", "Monitoring", new { namaDetailDokumen = fiel.NamaDetailDokumen })" width="100%" height="700" id="iFrame"></iframe>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @foreach (var (ket, index) in Model.ListPendukung.Select((value, i) => (value, i + 1)))
+        {
+            <hr />
+            <h5>Penanda Berkas : @index</h5>
+            <div class="row mb-2">
+                <div class="col-md">
+                    <div class="form-floating">
+                        <textarea id="floatingInputGrid" class="form-control text-start " style="height: 100px" disabled>@ket.KeteranganPendukungBerkas</textarea>
+                        <label for="floatingInputGrid">Keterangan</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion custom-accordionwithicon accordion-fill-success" id="accordionFill">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-@ket.IdPendukungBerkas" aria-expanded="false" aria-controls="collapseOne">
+                            @ket.IdKategoriPendukungBerkasNavigation.NamaKategoriPendukungBerkas
+                        </button>
+                    </h2>
+                    <div id="collapseOne-@ket.IdPendukungBerkas" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <iframe id="iframe" src="@Url.Action("DownloadPendukung", "Monitoring", new { namaDetailDokumen = ket.NamaDokumenPendukungBerkas })" width="100%" height="700" id="iFrame"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (ViewContext.HttpContext.User.IsInRole("Pengelola") || (ViewContext.HttpContext.User.IsInRole("Perekam") && actorClaimValue == item.IdKategoriBerkasNavigation.IdBidangNavigation.NamaBidang))
+        {
+            <div class="hstack gap-2 justify-content-end mt-4">
+                <button type="button" class="btn btn-danger me-2" onclick="checkdelete(@item.IdBerkas,0)"><div><i class="ri-delete-bin-line mt-1"></i></div>Hapus Berkas</button>
+                <button type="button" class="btn btn-warning me-2" onclick="checkUpdateStatus(@item.IdBerkas,3)"><div><i class="ri-restart-line mt-1"></i></div>Revisi Berkas</button>
+            </div>
+        }
+
+    </div>
+
+}
+
+
+<script>
+    $('#iframe').load(function () {
+        $(this).height($(this).contents().height());
+        $(this).width($(this).contents().width());
+    });
+
+
+    function updateStatus(idBerkas, aksi) {
+
+        $.ajax({
+            type: "GET",
+            data: { 'IdBerkas': idBerkas, 'Aksi': aksi },
+            url: '@Url.Action("StatusChange", "Draft")',
+            success: function (resp) {
+                if (resp.status == 1) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<b>Info</b>',
+                        text: resp.message,
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                }
+            }
+        });
+    }
+    function checkUpdateStatus(idBerkas, aksi) {
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success ms-2",
+                cancelButton: "btn btn-danger me-2"
+            },
+            buttonsStyling: false
+        });
+        swalWithBootstrapButtons.fire({
+            title: "Apa kamu yakin ?",
+            text: "Yakin Mengirim Dokumen",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya , Tentu!",
+            cancelButtonText: "Jangan, Batalkan!",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                updateStatus(idBerkas, aksi);
+                swalWithBootstrapButtons.fire({
+                    title: "Sukses!",
+                    text: "File Sudah Sukses Terkirim !.",
+                    icon: "success"
+                });
+            } else if (
+                /* Read more about handling dismissals below */
+                result.dismiss === Swal.DismissReason.cancel
+            ) {
+                swalWithBootstrapButtons.fire({
+                    title: "Batal",
+                    text: "File Batal Dikirim ! ",
+                    icon: "error"
+                });
+            }
+        });
+    }
+
+    function checkdelete(idBerkas, aksi) {
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success ms-2",
+                cancelButton: "btn btn-danger me-2"
+            },
+            buttonsStyling: false
+        });
+        swalWithBootstrapButtons.fire({
+            title: "Apa kamu yakin ?",
+            text: "Yakin Menghapus Dokumen",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya , Tentu!",
+            cancelButtonText: "Jangan, Batalkan!",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                updateStatus(idBerkas, aksi);
+                swalWithBootstrapButtons.fire({
+                    title: "Sukses!",
+                    text: "File Sudah Sukses Dihapus !.",
+                    icon: "success"
+                });
+            } else if (
+                /* Read more about handling dismissals below */
+                result.dismiss === Swal.DismissReason.cancel
+            ) {
+                swalWithBootstrapButtons.fire({
+                    title: "Batal",
+                    text: "File Batal Dihapus ! ",
+                    icon: "error"
+                });
+            }
+        });
+    }
+
+    function updateStatus(idBerkas, aksi) {
+
+        $.ajax({
+            type: "GET",
+            data: { 'IdBerkas': idBerkas, 'Aksi': aksi },
+            url: '@Url.Action("StatusChange", "Draft")',
+            success: function (resp) {
+                if (resp.status == 1) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<b>Info</b>',
+                        text: resp.message,
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                }
+            }
+        });
+    }
+
+
+
+</script>
+
+
+

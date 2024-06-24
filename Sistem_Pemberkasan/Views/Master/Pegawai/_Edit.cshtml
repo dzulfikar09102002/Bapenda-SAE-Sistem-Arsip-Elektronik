@@ -1,0 +1,140 @@
+﻿@model Sistem_Pemberkasan.Models.Master.PegawaiVM.Edit
+<div class="row">
+	<div class="col-12 mb-3">
+
+		<form id="frmEdit" class="needs-validation" novalidate asp-controller="Pegawai" asp-action="StoreEdit" method="post" enctype="multipart/form-data">
+			<div class="row">
+				<div class="col-12 mb-3">
+					<label for="Ket" class="form-label required-star">NIK</label>
+					@Html.TextBoxFor(x => x.EditPegawaiRow.Nik, new { @class = "form-control" , @readonly=true })
+				</div>
+				<div class="col-12 mb-3">
+					<label for="Ket" class="form-label required-star">Nama</label>
+					@Html.TextBoxFor(x => x.EditPegawaiRow.NamaPegawai, new { @class = "form-control" })
+				</div>
+				<div class="col-12 mb-3">
+					<label for="Ket" class="form-label required-star">No Telephon</label>
+					@Html.TextBoxFor(x => x.EditPegawaiRow.NoTelepon, new { @class = "form-control" })
+				</div>
+				<div class="col-12 mb-3">
+					<label class="form-label required-star">Jenis Kelamin</label>
+					<div class="d-flex">
+						<div class="form-check me-3">
+							@Html.RadioButtonFor(x => x.EditPegawaiRow.JenisKelamin, true, new { @class = "form-check-input" })
+							<label class="form-check-label">Laki-Laki</label>
+						</div>
+						<div class="form-check">
+							@Html.RadioButtonFor(x => x.EditPegawaiRow.JenisKelamin, false, new { @class = "form-check-input" })
+							<label class="form-check-label">Perempuan</label>
+						</div>
+					</div>
+				</div>
+				<div class="col-12 mb-3">
+					<label for="Ket" class="form-label required-star">Email</label>
+					@Html.TextBoxFor(x => x.EditUserRow.Email, new { @class = "form-control", @type = "email" })
+				</div>
+				<div class="col-12 mb-3">
+					<label for="OldPassword" class="form-label required-star">Password Lama</label>
+					<div class="position-relative auth-pass-inputgroup ">
+						@Html.TextBoxFor(x => x.OldPassword, new { @class = "form-control", @type = "password", @id = "OldPassword" })
+						<button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon" onclick="showPasswordOld();"><i class="ri-eye-fill align-middle"></i></button>
+					</div>
+				</div>
+				<div class="col-12 mb-3">
+					<label for="NewPassword" class="form-label required-star">Password Baru</label>
+					<div class="position-relative auth-pass-inputgroup ">
+						@Html.TextBoxFor(x => x.NewPassword, new { @class = "form-control", @type = "password", @id = "NewPassword" })
+						<button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon" type="button" id="password-addon" onclick="showPasswordNew();"><i class="ri-eye-fill align-middle"></i></button>
+					</div>
+				</div>
+				<div class="col-12 mb-3">
+					<label for="Ket" class="form-label required-star">Bidang</label>
+					@Html.DropDownListFor(x => x.EditPegawaiRow.IdBidang,
+											new SelectList(Model.ListBidang, "IdBidang", "NamaBidang"),
+											"Pilih Bidang", new { @class = "form-select" })
+				</div>
+				<div class="col-12 mb-3">
+					<label for="Ket" class="form-label required-star">Role</label>
+					@Html.DropDownListFor(x => x.EditUserRow.IdRole,
+											new SelectList(Model.ListRole, "IdRole", "JenisRole"),
+											"Pilih Role", new { @class = "form-select" })
+				</div>
+				<div class="col-12 mb-3">
+					<label for="Status" class="form-label required-star">Status</label>
+					@Html.DropDownListFor(x => x.EditPegawaiRow.StatusPegawai,
+											new List<SelectListItem>
+					{
+					new SelectListItem { Text = "Active", Value = "1" },
+					new SelectListItem { Text = "Non-active", Value = "0" }
+					}, "Pilih Status", new { @class = "form-select" })
+				</div>
+
+			</div>
+		</form>
+
+	</div>
+	<div class="hstack gap-2 justify-content-end">
+		<button type="button" class="btn btn-danger" id="btn-tutup-event" data-bs-dismiss="modal">Tutup</button>
+		<button type="button" class="btn btn-success" id="btn-save-event" onclick="fnSimpan()">Simpan</button>
+	</div>
+</div>
+<script>
+	$(document).ready(function () {
+	});
+	function showPasswordOld() {
+		var key_attr = $('#OldPassword').attr('type');
+		if (key_attr !== 'text') {
+			$('#OldPassword').attr('type', 'text');
+		} else {
+			$('#OldPassword').attr('type', 'password');
+		}
+	}
+	function showPasswordNew() {
+		var key_attr = $('#NewPassword').attr('type');
+		if (key_attr !== 'text') {
+			$('#NewPassword').attr('type', 'text');
+		} else {
+			$('#NewPassword').attr('type', 'password');
+		}
+	}
+	function fnSimpan() {
+		var formData = new FormData($("#frmEdit")[0]);
+		var t = $("input[name='__RequestVerificationToken']").val();
+
+		$.ajax({
+			url: $("#frmEdit").attr('action'),
+			type: "POST",
+			data: formData,
+			dataType: "json",
+			contentType: false,
+			processData: false,
+			headers: {
+				"RequestVerificationToken": t
+			},
+			beforeSend: function () {
+				$("#loader").show()
+			},
+			complete: function () { $("#loader").hide(); },
+			success: function (resp) {
+				if (resp.status == 1) {
+					Swal.fire({
+						icon: 'success',
+						title: '<b>Info</b>',
+						text: resp.message,
+					}).then((result) => {
+						window.location.reload();
+					})
+				} else {
+					Swal.fire({
+						icon: 'warning',
+						title: '<b style="color:orange">Peringatan</b>',
+						text: resp.message,
+					})
+				}
+			}
+		});
+	}
+
+
+
+</script>

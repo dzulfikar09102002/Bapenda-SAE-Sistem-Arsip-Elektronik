@@ -1,0 +1,59 @@
+﻿@model Sistem_Pemberkasan.Models.Transaksi.MonitoringVM.editPendukung
+
+@foreach (var (ket, index) in Model.ListPendukung.Select((value, i) => (value, i + 1)))
+{
+    <form asp-controller="Monitoring" asp-action="saveEditPendukung" method="post" enctype="multipart/form-data" id="FormPendukung-@ket.IdPendukungBerkas">
+        <h5>Penanda : @index</h5>
+        <div class="row mb-2">
+            <div class="col-md">
+                <label for="floatingInputKeteranganPst">Keterangan</label>
+                <textarea class="form-control" id="floatingInputKeteranganPst" name="NewRow.KeteranganPendukungBerkas" placeholder="Keterangan" rows="4" style="height: 100px;">@ket.KeteranganPendukungBerkas</textarea>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md">
+                <label for="statusPendukung">Status Pendukung</label>
+                <select class="form-select" id="statusPendukung" aria-label="Default select example" name="NewRow.StatusPendukungBerkas">
+                    <option selected value="@ket.StatusPendukungBerkas">
+                        @if (ket.StatusPendukungBerkas == 1)
+                        {
+                            <text>Active</text>
+                        }
+                        else
+                        {
+                            <text>Non-Active</text>
+                        }
+                    </option>
+                    <option value="1">Active</option>
+                    <option value="0">Non-Active</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="accordion custom-accordionwithicon accordion-fill-success" id="accordionFill-@ket.IdPendukungBerkas">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne-@ket.IdPendukungBerkas" aria-expanded="false" aria-controls="collapseOne">
+                             @ket.IdKategoriPendukungBerkasNavigation.NamaKategoriPendukungBerkas
+                        </button>
+                    </h2>
+                    <div id="collapseOne-@ket.IdPendukungBerkas" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            <iframe id="iframe" src="@Url.Action("DownloadPendukung", "Monitoring", new { namaDetailDokumen = ket.NamaDokumenPendukungBerkas })" width="100%" height="700"></iframe>
+                            <div class="col-md">
+                                <div class="mt-">
+                                    <label for="FloatingFile">File Pendukung</label>
+                                    <input class="form-control" type="file" id="FloatingFile-@ket.IdPendukungBerkas" name="file" accept=".pdf">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-success waves-effect waves-light" onclick="saveEditPendukung('@ket.IdPendukungBerkas')">Update</button>
+        <hr />
+    </form>
+}

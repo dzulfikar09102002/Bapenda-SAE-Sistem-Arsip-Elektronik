@@ -1,0 +1,115 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+
+<header id="page-topbar">
+    <div class="layout-width">
+        <div class="navbar-header">
+            <div class="d-flex">
+                <!-- LOGO -->
+                <div class="navbar-brand-box horizontal-logo">
+                    <a href="index.html" class="logo logo-dark">
+                        <span class="logo-sm">
+                            <img src="~/assets/images/logo-surabaya.png" alt="" height="40">
+                        </span>
+                        <span class="logo-lg">
+                            <img src="~/assets/images/logo-surabaya.png" alt="" height="45">
+                            <span class="text-white-75 fs-15">&nbsp; SIPPJB</span>
+                        </span>
+                    </a>
+
+                    <a href="index.html" class="logo logo-light">
+                        <span class="logo-sm">
+                            <img src="~/assets/images/logo-surabaya.png" alt="" height="40">
+                        </span>
+                        <span class="logo-lg">
+                            <img src="~/assets/images/logo-surabaya.png" alt="" height="45">
+                            <span class="text-white-75 fs-15">&nbsp; SIPPJB</span>
+                        </span>
+                    </a>
+                </div>
+                <button type="button" class="btn btn-sm px-3 fs-16 header-item vertical-menu-btn topnav-hamburger"
+                        id="topnav-hamburger-icon">
+                    <span class="hamburger-icon">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+                </button>
+            </div>
+            <div class="d-flex align-items-center">
+                @*                 <div class="ms-1 header-item d-none d-sm-flex">
+                <button onclick="location.href='@Url.Action("Index","Login")'" type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle light-dark-mode">
+                <i class='bx ri-shut-down-line fs-22'></i>
+                </button>
+                </div> *@
+                <div class="navbar-collapse justify-content-end">
+                    <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+                        <li class="nav-item dropdown">
+                            @{
+                                var nameClaim = User.FindFirst(ClaimTypes.Name);
+                                var nameRole = User.FindFirst(ClaimTypes.Role);
+                                string Email = nameClaim?.Value ?? "";
+                                string Role = nameRole?.Value ?? "";
+                            }
+
+                            <div class="dropdown">
+                                <button type="button" class="btn" id="page-header-user-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="d-flex align-items-center">
+                                        <img src="~/assets/images/users/user-dummy-img.jpg" alt="" width="35" height="35" class="rounded-circle">
+                                        <span class="text-start ms-xl-2">
+                                            <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text"><h5 class="mb-0 fw-semibold">@Role</h5></span>
+                                            <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text"><h6 class="mb-0 text-secondary-emphasis">@Email</h6></span>
+                                        </span>
+                                    </span>
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end" style="">
+                                    <!-- item-->
+                                    <div class="ms-1 header-item d-none d-sm-flex">
+                                    <h6 class="dropdown-header">Welcome @Email ! </h6>
+                                        <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle" data-toggle="fullscreen" onclick="theme() ">
+                                            <i class='bx bx-fullscreen fs-22'></i>
+                                        </button>
+                                        <button type="button" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle light-dark-mode ms-2">
+                                            <i class='bx bx-moon fs-22'></i>
+                                        </button>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                 
+
+                                    <button type="button" onclick="Profil(`@Email`)" class="dropdown-item">
+                                        <p class="mb-0 fs-5"> <span class="mb-0"><i class="ri-user-3-line"></i></span> Profil</p>
+                                    </button>
+                                    <div class="dropdown-divider"></div>
+                                    <button type="button" onclick="location.href='@Url.Action("Logout","Login")'" class="dropdown-item">
+                                        <p class="mb-0 fs-5 text-danger"> <span class="mb-0"><i class="ri-logout-box-line"></i></span> Logout</p>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<script>
+    function theme() 
+    {
+        localStorage.setItem("theme", "dark");
+    }
+    function Profil(email) {
+
+        $.ajax({
+            type: "GET",
+            data: { Email: email },
+            url: '@Url.Action("Index", "Profile")',
+            success: function (data) {
+                $("#staticBackdrop .modal-title").html("Profile");
+                $("#staticBackdrop .modal-body").html(data);
+                $("#staticBackdrop").modal('show');
+            }
+        });
+    }
+</script>

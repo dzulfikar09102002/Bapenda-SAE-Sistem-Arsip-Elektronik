@@ -1,0 +1,98 @@
+﻿@model Sistem_Pemberkasan.ViewComponents.SidebarVC
+@{
+    string currentController = ViewContext.RouteData.Values["Controller"]?.ToString() ?? "";
+    string currentAction = ViewContext.RouteData.Values["Action"]?.ToString() ?? "";
+    string currentRoute = ("/" + currentController + "/" + currentAction).ToUpper();
+
+    // var roleRouteList = Model.Role.MRouteRoles;
+}
+<div class="app-menu navbar-menu">
+    <!-- LOGO -->
+    <div class="navbar-brand-box">
+        <!-- Light Logo-->
+        <a href="@Url.Action("Index", "Home")" class="logo logo-light">
+            <span class="logo-sm">
+                <img src="~/assets/images/logo-surabaya.png" alt="" height="35">
+            </span>
+            <span class="logo-lg">
+                <img src="~/assets/images/logo-surabaya.png" alt="" height="45">
+                <span class="text-white-75 fs-15">&nbsp; Bapenda</span>
+            </span>
+        </a>
+        <button type="button" class="btn btn-sm p-0 fs-20 header-item float-end btn-vertical-sm-hover"
+                id="vertical-hover">
+            <i class="ri-record-circle-line"></i>
+        </button>
+    </div>
+
+    <div id="scrollbar">
+        <div class="container-fluid">
+            <div id="two-column-menu">
+            </div>
+            <ul class="navbar-nav" id="navbar-nav">
+                <li class="menu-title"><span data-key="t-menu">Menu</span></li>
+                @if (ViewContext.HttpContext.User.IsInRole("Pengelola") || ViewContext.HttpContext.User.IsInRole("User") || ViewContext.HttpContext.User.IsInRole("Perekam"))
+                {
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Home")" class="nav-link menu-link" id="dashActive">
+                            <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboard">Dashboard</span>
+                        </a>
+                    </li> <!-- end Dashboard Menu -->
+                }
+                @if (ViewContext.HttpContext.User.IsInRole("Pengelola") || ViewContext.HttpContext.User.IsInRole("Perekam"))
+                {
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Draft")" class="nav-link menu-link" id="drafActive">
+                            <i class="ri-draft-line"></i> <span data-key="t-dashboard">Draft Dokumen</span>
+                        </a>
+                    </li> <!-- end DraftDokumen Menu -->
+                }
+                @if (ViewContext.HttpContext.User.IsInRole("Pengelola") || ViewContext.HttpContext.User.IsInRole("User") || ViewContext.HttpContext.User.IsInRole("Perekam"))
+                {
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Monitoring")" class="nav-link menu-link" id="monitorActive">
+                            <i class="ri-folder-3-line"></i> <span data-key="t-dashboard">Monitoring Dokumen</span>
+                        </a>
+                    </li> <!-- end Monitoring Dokumen Menu -->
+                }
+                @if (ViewContext.HttpContext.User.IsInRole("Pengelola"))
+                {
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Pegawai")" class="nav-link menu-link" id="penggunaActive">
+                            <i class="ri-user-settings-line"></i> <span data-key="t-dashboard">Kelola Pengguna</span>
+                        </a>
+                    </li> <!-- end Kelola Pengguna Menu -->
+                   @*  <li class="nav-item">
+                        <a href="@Url.Action("Index", "Home")" class="nav-link menu-link" id="kelFiturActive">
+                            <i class="ri-stack-line"></i> <span data-key="t-dashboard">Kelola Fitur</span>
+                        </a>
+                    </li> <!-- end Kelola Fitur Menu --> *@
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "KelolaBerkas")" class="nav-link menu-link" id="kellberActive">
+                            <i class="ri-folder-open-line"></i> <span data-key="t-dashboard">Kelola Kategori Berkas</span>
+
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Bidang")" class="nav-link menu-link" id="bidangActive">
+                            <i class="ri-folder-settings-line"></i> <span data-key="t-dashboard">Kelola Bidang</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "Dokumen")" class="nav-link menu-link" id="dokumenActive">
+                            <i class="ri-survey-line"></i> <span data-key="t-dashboard">Kelola Dokumen</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="@Url.Action("Index", "KategoriPendukung")" class="nav-link menu-link" id="pendukungActive">
+                            <i class="ri-folders-line"></i> <span data-key="t-dashboard">Kategori Pendukung</span>
+                        </a>
+                    </li>
+                }
+          
+            </ul>
+        </div>
+        <!-- Sidebar -->
+    </div>
+</div>
+<div class="vertical-overlay"></div>

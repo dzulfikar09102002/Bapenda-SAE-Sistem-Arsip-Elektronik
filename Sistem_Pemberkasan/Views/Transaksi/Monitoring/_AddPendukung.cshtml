@@ -1,0 +1,80 @@
+﻿@model Sistem_Pemberkasan.Models.Transaksi.MonitoringVM.addPendukung
+
+@foreach (var item in Model.BerkasList)
+{
+    <form asp-controller="Monitoring" asp-action="PendukungBaru" method="post" enctype="multipart/form-data" id="FormPendukung">
+        <div class="row mb-2">
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="floatingPendukung">Kategori Pendukung Berkas</label>
+                    @Html.DropDownListFor(m => m.NewPendukung.IdKategoriPendukungBerkas, new SelectList(Model.KategoriList, "IdKategoriPendukungBerkas", "NamaKategoriPendukungBerkas"), "Pilih Kategori", new { @class = "form-select", @id = "floatingPendukung", rows = "4" })
+                </div>
+            </div>
+        </div>
+        @Html.HiddenFor(m=>m.berkasId.IdBerkas)
+        <div class="row mb-2">
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="FloatingKeterangan">Keterangan</label>
+                    @Html.TextAreaFor(x => x.NewRowPendukung.KeteranganPendukungBerkas, new { @class = "form-control", @id = "FloatingKeterangan", @placeholder = "Keterangan", @required = "required", rows = "4", style = "height: 100px;" })
+                </div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-md">
+                <div class=" mb-3">
+                    <label for="FloatingFile">File Pendukung</label>
+                    <input class="form-control" type="file" id="FloatingFile" name="file" accept=".pdf">
+                </div>
+            </div>
+        </div>
+        <div class="flex">
+            <button type="button" class="btn btn-danger waves-effect waves-light me-2" data-bs-dismiss="modal">Tutup</button>
+            <button type="button" class="btn btn-success waves-effect waves-light" onclick="fnSimpan()">Tambah</button>
+        </div>
+    </form>
+}
+
+
+<script>
+    function fnSimpan() {
+        var formData = new FormData($("#FormPendukung")[0]);
+        var t = $("input[name='__RequestVerificationToken']").val();
+
+        $.ajax({
+            url: $("#FormPendukung").attr('action'),
+            type: "POST",
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            processData: false,
+            headers:
+            {
+                "RequestVerificationToken": t
+            },
+            beforeSend: function () {
+                $("#loader").show()
+            },
+            complete: function () { $("#loader").hide(); },
+            success: function (resp) {
+                if (resp.status == 1) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<b>Info</b>',
+                        text: resp.message,
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                }
+            }
+        })
+
+    }
+</script>

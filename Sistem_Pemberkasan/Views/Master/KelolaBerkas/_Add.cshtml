@@ -1,0 +1,81 @@
+﻿@model Sistem_Pemberkasan.Models.Master.BerkasVM.Add
+
+<form asp-controller="KelolaBerkas" asp-action="SaveKategoriBerkas" method="post" enctype="multipart/form-data" id="FormKategoriBerkas">
+    <div class="row mb-3">
+        <div>
+            <label for="namaBerkas">Nama Kategori Berkas</label>
+            @Html.TextBoxFor(x => x.newRow.JenisKategoriBerkas, new { @class = "form-control", @id = "namaBerkas", @placeholder = "Masukkan Nama Kategori Berkas", @required = "required" })
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div>
+            <label for="bidang">Pilih Bidang</label>
+            @Html.DropDownListFor(m => m.NewRow.IdBidang, new SelectList(Model.ListBidang, "IdBidang", "Singkatan"), "Pilih Kategori", new { @class = "form-control", @id = "bidang" })
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div>
+            <label for="dokumen">Pilih dokumen</label>
+            @Html.ListBoxFor(m => m.daftarIDSelect, new MultiSelectList(Model.ListDokumen, "IdDokumen", "NamaDokumen"), new { @class = "form-control", @id = "dokumen", style = "background: none; border: none;" })
+
+        </div>
+    </div>
+
+    <div class="flex">
+        <button type="button" class="btn btn-danger waves-effect waves-light me-2" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-success waves-effect waves-light" onclick="fnSimpan()">Tambah</button>
+    </div>
+</form>
+
+
+<script>
+    $(function () {
+        let choices = new Choices("#dokumen", {
+            removeItemButton: true,
+            placeholder: true,
+            placeholderValue: 'Pilih Dokumen',
+        })
+    });
+    function fnSimpan() {
+        var formData = new FormData($("#FormKategoriBerkas")[0]);
+        var t = $("input[name='__RequestVerificationToken']").val();
+
+        $.ajax({
+            url: $("#FormKategoriBerkas").attr('action'),
+            type: "POST",
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            processData: false,
+            headers:
+            {
+                "RequestVerificationToken": t
+            },
+            beforeSend: function () {
+                $("#loader").show()
+            },
+            complete: function () { $("#loader").hide(); },
+            success: function (resp) {
+                if (resp.status == 1) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<b>Info</b>',
+                        text: resp.message,
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                }
+            }
+        })
+
+    }
+</script>

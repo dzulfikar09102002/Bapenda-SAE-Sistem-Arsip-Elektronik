@@ -1,0 +1,51 @@
+﻿@model Sistem_Pemberkasan.Models.Master.PegawaiVM.ProfileUser
+@{
+    <form id="frmProfil" class="needs-validation" novalidate asp-controller="Profil" method="" enctype="multipart/form-data">
+        <fieldset disabled>
+            @foreach (var item in Model.UserNow)
+            {
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label">Nama</label>
+                    <input type="text" id="disabledTextInput" class="form-control" placeholder="@item.NikNavigation.NamaPegawai">
+                </div>
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label">Jenis Kelamin</label>
+                    @if (item.NikNavigation.JenisKelamin == true)
+                    {
+                        <input type="text" id="disabledTextInput" class="form-control" placeholder="Laki-laki">
+                    }else
+                    {
+                        <input type="text" id="disabledTextInput" class="form-control" placeholder="Perempuan">
+                    }
+                </div>
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label">Nomor Telepon</label>
+                    <input type="text" id="disabledTextInput" class="form-control" placeholder="@item.NikNavigation.NoTelepon">
+                </div>
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label">Status Pegawai</label>
+                    @if (item.NikNavigation.StatusPegawai == 1)
+                    {
+                        <input type="text" id="disabledTextInput" class="form-control" placeholder="Aktif">
+                    }
+                    else
+                    {
+                        <input type="text" id="disabledTextInput" class="form-control" placeholder="Tidak Aktif">
+                    }
+                </div>
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label">Role</label>
+                    <input type="text" id="disabledTextInput" class="form-control" placeholder="@item.IdRoleNavigation.JenisRole">
+                </div>
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label">Bidang</label>
+                    <input type="text" id="disabledTextInput" class="form-control" placeholder="@item.NikNavigation.IdBidangNavigation.NamaBidang">
+                </div>
+                <div class="mb-3">
+                    <label for="disabledTextInput" class="form-label">Email</label>
+                    <input type="text" id="disabledTextInput" class="form-control" placeholder="@item.Email">
+                </div>
+            }
+        </fieldset>
+    </form>
+}

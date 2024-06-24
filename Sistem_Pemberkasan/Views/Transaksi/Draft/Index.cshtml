@@ -1,0 +1,377 @@
+﻿@model Sistem_Pemberkasan.Models.Transaksi.DraftVM.Index
+
+@{
+    ViewData["Title"] = "Draft Dokumen";
+}
+
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h2 class="mb-sm-0">Draft Dokumen</h2>
+
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Master</a></li>
+                    <li class="breadcrumb-item active">Draft Dokumen</li>
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-6 mb-3">
+        <button type="button" onclick="formModal()" class="btn btn-primary"><i class="ri-add-fill me-2"></i> Upload Berkas Baru</button>
+    </div>
+    @*     <div class="col-6 mb-3">
+    <form asp-controller="Draft" asp-action="Search" method="post" class="d-flex">
+
+    @Html.TextBoxFor(x => x.SearchBox, new { @class = "form-control", @id = "search", @placeholder = "Cari Nama Pemohon / NOP" })
+
+    <button type="button" onclick="Search()" class="btn btn-primary ms-2">Cari</button>
+    </form>
+    </div> *@
+</div>
+
+
+<div class="card">
+    <div class="card-body">
+        <form asp-controller="Draft" asp-action="Filter" method="post" enctype="multipart/form-data" id="formFilter">
+            <div class="d-lg-flex">
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatingBidang">Bidang</label>
+                    @Html.DropDownListFor(m => m.IdBidang, new SelectList(Model.FilterBidang, "IdBidang", "NamaBidang"), "Pilih Bidang", new
+                        { @class = "form-select", @id = "floatingBidang" })
+                </div>
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatingKategori">Kategori</label>
+                    @Html.DropDownListFor(m => m.IdKategori, new SelectList(Model.FilterKategori, "IdKategoriBerkas", "JenisKategoriBerkas"), "Pilih Kategori", new
+                        { @class = "form-select", @id = "floatingKategori" })
+                </div>
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatingStatus">Status</label>
+                    <select class="form-select" aria-label=".form-select-lg example" id="floatingStatus">
+                        <option selected value="5">Filter Status Berkas</option>
+                        <option value="1">Draft</option>
+                        <option value="3">Belum Direvisi</option>
+                        <option value="4">Sudah Direvisi</option>
+                        <option value="0">Terhapus</option>
+                    </select>
+                </div>
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatTanggalMulai">Tanggal Mulai</label>
+                    @Html.TextBoxFor(m => m.tanggalMulai, DateTime.Now.AddYears(-1).ToString("yyyy-MM-ddTHH:mm"), new { @class = "form-control", type = "datetime-local", @id = "floatTanggalMulai" })
+                </div>
+
+                <div class="d-flex flex-fill flex-column justify-content-end me-2">
+                    <label for="floatTanggalAkhir">Tanggal Akhir</label>
+                    @Html.TextBoxFor(m => m.tanggalAkhir, DateTime.Now.ToString("yyyy-MM-ddTHH:mm"), new { @class = "form-control", type = "datetime-local", @id = "floatTanggalAkhir" })
+                </div>
+
+                <div class="d-flex flex-fill flex-column justify-content-end">
+                    <button type="button" onclick="Filter()" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<div class="card mt-2">
+    <div class="card-body table-responsive">
+        <!-- Striped Rows -->
+
+        <div class="table-responsive" id="table"></div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            $("#drafActive").addClass('active')
+            $('#tbl').DataTable({
+                responsive: true,
+                searching: true
+            });
+            //bug search
+            $(window).keydown(function (event) {
+                if (event.keyCode == 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+
+            Filter();
+
+        });
+        function Filter() {
+            // var formData = new FormData($("#formFilter")[0]);
+            var formData = new FormData();
+            var tanggalMulai = $('#floatTanggalMulai').val();
+            var tanggalAkhir = $('#floatTanggalAkhir').val();
+            var IdBidang = $('#floatingBidang').val();
+            var IdKategori = $('#floatingKategori').val();
+            var StatusBerkas = $('#floatingStatus').val();
+
+            var t = $("input[name='__RequestVerificationToken']").val();
+            console.log(formData)
+            $.ajax({
+                type: "POST",
+                data: {
+                    tanggalMulai,
+                    tanggalAkhir,
+                    IdBidang,
+                    IdKategori,
+                    StatusBerkas
+                },
+                url: '@Url.Action("Filter")',
+                headers:
+                {
+                    "RequestVerificationToken": t
+                },
+                beforeSend: function () {
+                    $("#loader").show()
+                },
+                complete: function () { $("#loader").hide(); },
+                success: function (resp) {
+                    if (resp.status == undefined) {
+                        $("#loader").hide();
+                        $("#tableNofilter").hide();
+                        $('#table').show();
+                        $('#table').html(resp);
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: resp.message,
+                        })
+                        $("#loader").hide()
+                    }
+                }
+            });
+
+        }
+        function Search() {
+            // var formData = new FormData($("#formFilter")[0]);
+            var formData = new FormData();
+            var SearchBox = $('#search').val();
+
+            var t = $("input[name='__RequestVerificationToken']").val();
+            console.log(formData)
+            $.ajax({
+                type: "POST",
+                data: {
+                    SearchBox
+                },
+                url: '@Url.Action("Search")',
+                headers:
+                {
+                    "RequestVerificationToken": t
+                },
+                beforeSend: function () {
+                    $("#loader").show()
+                },
+                complete: function () { $("#loader").hide(); },
+                success: function (resp) {
+                    if (resp.status == undefined) {
+                        $("#loader").hide();
+                        $("#tableNofilter").hide();
+                        $('#table').show();
+                        $('#table').html(resp);
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: resp.message,
+                        })
+                        $("#loader").hide()
+                    }
+                }
+            });
+
+        }
+
+
+        function formModal() {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("ModalBoxForm")',
+                success: function (data) {
+                    $("#staticBackdrop .modal-dialog").addClass("modal-lg");
+                    $("#staticBackdrop .modal-title").html("Form Upload Berkas");
+                    $("#staticBackdrop .modal-body").html(data);
+                    $("#staticBackdrop").modal('show');
+                }
+            });
+        }
+
+        function detailDokumen(id_berkas, noRev) {
+            $.ajax({
+                type: "GET",
+                data: { IdBerkas: id_berkas, NoRev: noRev },
+                url: '@Url.Action("DetailDokumen", "Draft")',
+                success: function (data) {
+                    if (data.Status === undefined) {
+                        $("#staticBackdrop .modal-dialog").addClass("modal-dialog-centered modal-dialog-scrollable");
+                        $("#staticBackdrop .modal-dialog").addClass("modal-lg");
+                        $("#staticBackdrop .modal-title").html("Detail Berkas");
+                        $("#staticBackdrop .modal-body").html(data);
+                        $("#staticBackdrop").modal('show');
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: data.Message
+                        })
+                    }
+                }
+            });
+        }
+        function Filter1() {
+            var formData = new FormData($("#formFilter")[0]);
+
+
+            var t = $("input[name='__RequestVerificationToken']").val();
+            console.log(formData)
+            $.ajax({
+                type: "POST",
+                data: formData,
+                url: '@Url.Action("Filter")',
+                headers:
+                {
+                    "RequestVerificationToken": t
+                },
+                beforeSend: function () {
+                    $("#loader").show()
+                },
+                complete: function () { $("#loader").hide(); },
+                success: function (resp) {
+                    if (resp.status == undefined) {
+                        $("#loader").hide()
+                        $('#table').show();
+                        $('#table').html(resp);
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: resp.message,
+                        })
+                        $("#loader").hide()
+                    }
+                }
+            });
+        }
+    </script>
+    <script>
+        function saveFile() {
+            var formData = new FormData($("#formUpload")[0]);
+            var t = $("input[name='__RequestVerificationToken']").val();
+            console.log("upload()")
+            $.ajax({
+                url: $("#formUpload").attr('action'),
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+                headers:
+                {
+                    "RequestVerificationToken": t
+                },
+                beforeSend: function () {
+                    $("#loader").show()
+                },
+                complete: function () { $("#loader").hide(); },
+                success: function (resp) {
+                    if (resp.status == 1) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '<b>Info</b>',
+                            text: resp.message,
+                        }).then((result) => {
+                            window.location.reload();
+                        })
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: resp.message,
+                        })
+                    }
+                }
+            });
+
+        }
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $('#partialUpload').hide();
+            $('#dropdown').hide();
+            $('#ListForm').on('change', function () {
+                if ($(#ListForm).find(":selected").val() === "kosong") {
+                    $('#partialUpload').hide();
+                }
+                else {
+                    getDataForm($(#ListForm).find(":selected").val());
+                    alert($(#ListForm).find(":selected").val())
+
+                }
+            });
+            var route = '@Url.Action("GetDataForm", "Draft")';
+            route = encodeURI(route);
+            $('#partialUpload').load(route);
+
+        });
+        function getDataForm(id_kategori_bidang) {
+            var formData = new FormData($("#formUpload")[0]);
+            var t = $("input[name='__RequestVerificationToken']").val();
+            console.log("upload()")
+
+            $.ajax({
+                url: '@(Url.Action("GetDataForm", "Draft"))',
+                type: "GET",
+                data: { id: id_kategori_bidang },
+                headers:
+                {
+                    "RequestVerificationToken": t
+                },
+                beforeSend: function () {
+                    $("#loader").show()
+                    $('#partialUpload').hide();
+                },
+                complete: function () { $("#loader").hide(); },
+                success: function (resp) {
+                    if (resp.status == undefined) {
+                        $('#partialUpload').show();
+                        $('#partialUpload').html(resp);
+                        $("#loader").hide()
+                    }
+                    else {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: resp.message,
+                        })
+                        $("#loader").hide()
+                    }
+                }
+            })
+        }
+
+    </script>
+}
+

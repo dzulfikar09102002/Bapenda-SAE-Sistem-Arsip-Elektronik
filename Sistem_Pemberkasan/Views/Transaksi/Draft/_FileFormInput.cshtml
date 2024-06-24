@@ -1,0 +1,161 @@
+﻿@model Sistem_Pemberkasan.Models.Transaksi.DraftVM.ModalBox
+<div>
+
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col">
+                <select class="form-select" aria-label="Default select example" id="selectDokumen">
+                    <option selected value="0">Pilih Jenis Upload</option>
+                    <option value="1">File Jadi Satu</option>
+                    <option value="2">File Terpisah</option>
+                </select>
+            </div>
+        </div>
+        <hr />
+        <div class="row">
+            <div id="fileSatu">
+                
+                <div class="container">
+                    <div class="row">
+                        <div class="col">
+                            <label for="formFile" class="form-label">Dokumen Jadi Satu</label>
+                                @Html.HiddenFor(x => x.DaftarId[0])
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-9">
+                            <input class="form-control formFile_satu" type="file" id="formFile" name="files" accept=".pdf">
+
+                        </div>
+                        <div class="col-3">
+                            <button type="button" onclick="previewPDF(`satu`)" class="btn btn-primary">Pratinjau PDF</button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="fileTerpisah">
+                @foreach (var item in Model.DokumenList)
+                {
+                    @if (item.IdDokumen != 4 )
+                    {
+                        <div class="container">
+                            <div class="row">
+                                <div class="col">
+                                    <label for="formFile" class="form-label">@item.IdDokumenNavigation.NamaDokumen</label>
+                                    @for (int i = 1; i < Model.DaftarId.Length; i++)
+                                    {
+                                        @Html.HiddenFor(x => x.DaftarId[i])
+                                    }
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-9">
+                                    <input class="form-control formFile_@item.IdDokumen" type="file" id="formFile" name="files" accept=".pdf">
+
+                                </div>
+                                <div class="col-3">
+                                    <button type="button" onclick="previewPDF(@item.IdDokumen)" class="btn btn-primary">Pratinjau PDF</button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+
+    <div class="hstack gap-2 justify-content-end">
+        <button type="button" class="btn btn-danger" id="btn-tutup-event" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-success" id="submit">Simpan</button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $('#fileSatu').hide();
+        $('#fileTerpisah').hide();
+
+        $('#selectDokumen').on('change', function () {
+            if ($(this).find(":selected").val() === "1") {
+                $('#fileSatu').show();
+                $('#fileTerpisah').hide();
+            }
+            else if ($(this).find(":selected").val() === "2") {
+                $('#fileSatu').hide();
+                $('#fileTerpisah').show();
+            }
+            else {
+                $('#fileSatu').hide();
+                $('#fileTerpisah').hide();
+            }
+        });
+        $('#submit').on('click', function () {
+            var nilaiDokumen = $('#selectDokumen').val();
+            SaveDraft(nilaiDokumen);
+        });
+
+        $('#formFile').change(function () {
+            var fileInput = $(this)[0];
+            var fileName = fileInput.value;
+            var fileSize = fileInput.files[0].size; // Ukuran file dalam bytes
+            var allowedExtensions = ['.pdf'];
+            var maxFileSize = 10 * 1024 * 1024; // 10MB dalam bytes
+
+            // Validasi format file
+            var fileExtension = fileName.split('.').pop().toLowerCase();
+            if (!allowedExtensions.includes('.' + fileExtension)) {
+                alert('Hanya file PDF yang diperbolehkan.');
+                $('#formFile').val(''); // Reset input file
+                return false;
+            }
+
+            // Validasi ukuran file
+            if (fileSize > maxFileSize) {
+                alert('Ukuran file terlalu besar. Maksimal 10 MB.');
+                $('#formFile').val(''); // Reset input file
+                return false;
+            }
+
+            return true;
+        });
+        // Mengaitkan fungsi previewPDF dengan tombol pratinjau
+        $('#formFile').on('change', function () {
+            previewPDF(this);
+        });
+
+    });
+    function previewImage() {
+        pdffile = document.getElementById("formFile").files[0];
+        pdffile_url = URL.createObjectURL(pdffile);
+        $('#viewer').attr('src', pdffile_url);
+    }
+    function closePreview() {
+        $('#viewer').hide();
+    }
+
+    function previewPDF(namaFile) {
+        // Mendapatkan elemen input file berdasarkan ID
+        var fileInput = $('.formFile_' + namaFile).get(0);
+
+        console.log(fileInput)
+        // Mendapatkan file yang dipilih oleh pengguna
+        var file = fileInput.files[0];
+
+        if (file) {
+            // Membuat URL objek untuk file yang dipilih
+            var fileURL = URL.createObjectURL(file);
+
+            // Membuka URL objek dalam tab baru
+            window.open(fileURL, '_blank');
+        } else {
+            console.log('Tidak ada file yang dipilih.');
+        }
+    }
+
+
+</script>

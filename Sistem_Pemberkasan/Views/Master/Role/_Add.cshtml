@@ -1,0 +1,59 @@
+﻿@model Sistem_Pemberkasan.Models.Master.RoleVM.Add
+<div class="row">
+    <div class="col-12 mb-3">
+        <form id="frmAdd" class="needs-validation" novalidate asp-controller="Department" asp-action="SimpanBaru" method="post" enctype="multipart/form-data">
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <label for="Ket" class="form-label required-star">Jenis Role</label>
+                    @Html.TextBoxFor(x => x.NewRow.JenisRole , new {@class = "form-control"})
+                </div>
+            </div>
+        </form>
+
+    </div>
+    <div class="hstack gap-2 justify-content-end">
+        <button type="button" class="btn btn-success" id="btn-save-event" onclick="fnSimpan()">Simpan</button>
+    </div>
+
+    <hr class="mt-2" />
+    <div id="dataRole" style="display: none"></div>
+</div>
+<script>
+    $(document).ready(function () {
+        getDataRole()
+    });
+
+    function getDataRole() {
+
+        var t = $("input[name='__RequestVerificationToken']").val();
+        $.ajax({
+            url: '@(Url.Action("Index", "Role"))',
+            type: "GET",
+            // data: { id: id_posisi },
+            headers:
+            {
+                "RequestVerificationToken": t
+            },
+            beforeSend: function () {
+                $("#loader").show()
+                $('#dataRole').hide();
+            },
+            complete: function () { $("#loader").hide(); },
+            success: function (resp) {
+                if (resp.status == undefined) {
+                    $('#dataRole').show();
+                    $('#dataRole').html(resp);
+                    $("#loader").hide()
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                    $("#loader").hide()
+                }
+            }
+        })
+    }
+</script>

@@ -1,0 +1,19 @@
+﻿
+@model Sistem_Pemberkasan.Models.Master.BerkasVM.Detail
+    <ul class="list-group">
+    @foreach (var item in Model.BerkasList)
+    {
+            <li class="list-group-item">@item.IdDokumenNavigation.NamaDokumen</li>
+    }
+    </ul>
+
+<script>
+    $('#iframe').load(function () {
+        $(this).height($(this).contents().height());
+        $(this).width($(this).contents().width());
+    });
+
+</script>
+
+
+

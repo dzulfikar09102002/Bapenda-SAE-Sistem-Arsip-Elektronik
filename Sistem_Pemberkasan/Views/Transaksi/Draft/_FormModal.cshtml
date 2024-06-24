@@ -1,0 +1,243 @@
+﻿@model Sistem_Pemberkasan.Models.Transaksi.DraftVM.ModalBox
+<form asp-controller="Draft" asp-action="SaveDraft" method="post" enctype="multipart/form-data" id="formUpload">
+
+    <div class="row g-2 mb-2">
+        <div class="col-md">
+            <div class="mb-3">
+                <label for="floatingInputNoReferensi">No.Refrensi</label>
+                @Html.TextBoxFor(x => x.NewRow.NoReferensi, new { @class = "form-control", @id = "floatingInputNoReferensi", @placeholder = "Input No Refrensi", @required = "required" })
+            </div>
+        </div>
+        <div class="col-md">
+            <div class=" mb-3">
+                <label for="floatingInputNop">NOP</label>
+                @Html.TextBoxFor(x => x.NewRow.Nop, new { @class = "form-control", @id = "floatingInputNop", @placeholder = "Input NOP", @required = "required" })
+            </div>
+        </div>
+    </div>
+    <div class="row g-2 mb-2">
+        <div class="col-md">
+            <div class=" mb-3">
+                <label for="floatingInputNamaPemohon">Nama Pemohon</label>
+                @Html.TextBoxFor(x => x.NewRow.NamaPemohon, new { @class = "form-control", @id = "floatingInputNamaPemohon", @placeholder = "Nama Pemohon (Opsional)", @required = "required" })
+            </div>
+        </div>
+        <div class="col-md ">
+            <div class=" mb-3">
+                <label for="floatingInputAlamatPemohon">Alamat Pemohon</label>
+                @Html.TextBoxFor(x => x.NewRow.AlamatPemohon, new { @class = "form-control", @id = "floatingInputAlamatPemohon", @placeholder = "Input Alamat Pemohon (Opsional)", @required = "required" })
+            </div>
+        </div>
+    </div>
+    <div class="row g-2 mb-2">
+        <div class="col-md">
+            <div class=" mb-3">
+                <label for="floatingInputNoTelpPemohon">No Telp Pemohon</label>
+                @Html.TextBoxFor(x => x.NewRow.NoTelpPemohon, new { @class = "form-control", @id = "floatingInputNoTelpPemohon", @placeholder = "Input No Telp Pemohon (Opsional)", @required = "required" })
+            </div>
+        </div>
+        <div class="col-md">
+            <div class=" mb-3">
+                <label for="floatingInputNoSk">No.SK</label>
+                @Html.TextBoxFor(x => x.NewRow.NoSk, new { @class = "form-control", @id = "floatingInputNoSk", @placeholder = "Input No SK", @required = "required" })
+            </div>
+        </div>
+    </div>
+    <div class="row mb-2">
+        <div class="col-md">
+            <div class=" mb-3">
+                <label for="floatingInputKeteranganPst">Keterangan </label>
+                @Html.TextAreaFor(x => x.NewRow.KeteranganPst, new { @class = "form-control", @id = "floatingInputKeteranganPst", @placeholder = "Keterangan", @required = "required", rows = "4", style = "height: 100px;" })
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div id="dropdown">
+        <div class="col-12 mb-3">
+            <label for="Ket" class="form-label required-star">Pilih Kategori Berkas</label>
+            @Html.DropDownListFor(m => m.NewRow.IdKategoriBerkas, new SelectList(Model.ListKategori, "IdKategoriBerkas", "JenisKategoriBerkas"), "Pilih Kategori", new { @class = "form-control" })
+        </div>
+    </div>
+    <hr />
+    <div id="partialUpload">
+    </div>
+
+</form>
+
+
+<script>
+    $(document).ready(function () {
+        $('#partialUpload').hide();
+        $('#NewRow_IdKategoriBerkas').on('change', function () {
+            if ($(this).find(":selected").val() === "0") {
+
+                $('#partialUpload').hide();
+            }
+            else {
+
+                getDataFileForm($(this).find(":selected").val());
+            }
+        });
+
+    });
+    function getInputForm() {
+        var t = $("input[name='__RequestVerificationToken']").val();
+        $.ajax({
+            url: '@(Url.Action("FormInput", "Draft"))',
+            type: "GET",
+            data: { id: id },
+            headers:
+            {
+                "RequestVerificationToken": t
+            },
+            complete: function () { $("#loader").hide(); },
+            success: function (resp) {
+                if (resp.status == undefined) {
+                    $('#inputForm').show();
+                    $('#inputForm').html(resp);
+                    $("#loader").hide()
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                    $("#loader").hide()
+                }
+            }
+        })
+    }
+    function getDataFileForm(id_kategori_berkas) {
+
+        var t = $("input[name='__RequestVerificationToken']").val();
+        $.ajax({
+            url: '@(Url.Action("FileForm", "Draft"))',
+            type: "GET",
+            data: { id: id_kategori_berkas },
+            headers:
+            {
+                "RequestVerificationToken": t
+            },
+            beforeSend: function () {
+                $("#loader").show()
+                $('#partialUpload').hide();
+            },
+            complete: function () { $("#loader").hide(); },
+            success: function (resp) {
+                if (resp.status == undefined) {
+                    $('#partialUpload').show();
+                    $('#partialUpload').html(resp);
+                    $("#loader").hide()
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                    $("#loader").hide()
+                }
+            }
+        })
+    }
+
+    async function termCondition() {
+        const { value: accept } = await Swal.fire({
+            title: "Terms and conditions",
+            input: "checkbox",
+            inputValue: 1,
+            inputPlaceholder: `
+                I agree with the terms and conditions
+              `,
+            confirmButtonText: `
+                Continue&nbsp;<i class="fa fa-arrow-right"></i>
+              `,
+            inputValidator: (result) => {
+                return !result && "You need to agree with T&C";
+            }
+        });
+        if (accept) {
+            Swal.fire("You agreed with T&C :)");
+            SaveDraft();
+        }
+    }
+    function SaveDraft(id) {
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success ms-2",
+                cancelButton: "btn btn-danger me-2"
+            },
+            buttonsStyling: false
+        });
+        swalWithBootstrapButtons.fire({
+            title: "Apa kamu yakin ?",
+            text: "Yakin Mengirim Dokumen",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya , Kirim!",
+            cancelButtonText: "Jangan, Batalkan!",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                uploadFile(id);
+
+            } else if (
+                /* Read more about handling dismissals below */
+                result.dismiss === Swal.DismissReason.cancel
+            ) {
+                swalWithBootstrapButtons.fire({
+                    title: "Batal",
+                    text: "File Batal Dikirim ! ",
+                    icon: "error"
+                });
+            }
+        });
+    }
+    function uploadFile(data) {
+        var formData = new FormData($("#formUpload")[0]);
+        formData.append('files', formFile);
+        formData.append('dataPilihan', data);
+
+        var t = $("input[name='__RequestVerificationToken']").val();
+
+        $.ajax({
+            url: $("#formUpload").attr('action'),
+            type: "POST",
+            data: formData,
+            dataType: "json",
+            contentType: false,
+            processData: false,
+            headers:
+            {
+                "RequestVerificationToken": t
+            },
+
+            beforeSend: function () {
+                $("#loader").show()
+
+            },
+            complete: function () { $("#loader").hide(); },
+            success: function (resp) {
+                if (resp.status == 1) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '<b>Info</b>',
+                        text: resp.message,
+                    }).then((result) => {
+                        window.location.reload();
+                    })
+                }
+                else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '<b style="color:orange">Peringatan</b>',
+                        text: resp.message,
+                    })
+                }
+            }
+        })
+    }
+</script>
+
+

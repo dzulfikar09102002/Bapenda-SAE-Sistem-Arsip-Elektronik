@@ -1,0 +1,130 @@
+﻿@model Sistem_Pemberkasan.Models.Master.DokumenVM.Index
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    ViewData["Title"] = "Master Dokumen";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h2 class="mb-sm-0">Master Dokumen</h2>
+
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Master</a></li>
+                    <li class="breadcrumb-item active">Master Dokumen</li>
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg">
+        <div class="input-group mb-3">
+            <button class="btn btn-primary d-flex align-items-center" onclick="Add()"><i class="ri-add-fill me-2"></i>Master Dokumen Baru </button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col">
+        <div class="card mt-2 p-3 rounded-3">
+            <div class="card-body">
+                <!-- Striped Rows -->
+                <div class="table-responsive">
+                    <table id="tbl" class="w-100 table table-bordered dt-responsive nowrap table-striped table-hover align-middle dataTable no-footer dtr-inline collapsed">
+                        <thead >
+                            <tr>
+                                <th class="text-center" scope="col" >No</th>
+                                <th class="text-center" scope="col" >Master Dokumen</th>
+                                <th class="text-center" scope="col" >Status Dokumen</th>
+                                <th class="text-center" scope="col" >Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var (item , index) in Model.DokumenList.Select((value, i) => (value, i + 1)))
+                            {
+                                <tr>
+                                    <td class="text-center">@index</td>
+                                    <td>@item.NamaDokumen</td>
+                                    <td>
+                                        @if (item.StatusDokumen == 1)
+                                        {
+                                            <div class="d-flex justify-content-center">
+                                                <span class="badge bg-success">Active</span>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="d-flex justify-content-center">
+                                                <span class="badge bg-danger">Non-Active</span>
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex justify-content-center">
+                                            <button class="btn btn-secondary" onclick="Edit('@item.IdDokumen')"><div><i class="las la-edit"></i></div>Edit</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+            $("#dokumenActive").addClass('active')
+            $('#tbl').DataTable({
+                responsive: true
+            });
+
+        });
+
+        function Add() {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("Add", "Dokumen")',
+                success: function (data) {
+                    $("#staticBackdrop .modal-title").html("Master Dokumen Baru");
+                    $("#staticBackdrop .modal-body").html(data);
+                    $("#staticBackdrop").modal('show');
+                }
+            });
+        }
+
+        function Edit(id) {
+            $.ajax({
+                type: "GET",
+                data: { id: id },
+                url: '@Url.Action("Edit", "Dokumen")',
+                success: function (data) {
+                    if (data.Status === undefined) {
+                        $("#staticBackdrop .modal-title").html("Edit Master Dokumen");
+                        $("#staticBackdrop .modal-body").html(data);
+                        $("#staticBackdrop").modal('show');
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: data.Message
+                        })
+                    }
+                }
+            });
+        }
+
+    </script>
+
+}

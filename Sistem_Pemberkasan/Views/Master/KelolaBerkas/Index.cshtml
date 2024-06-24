@@ -1,0 +1,205 @@
+@model Sistem_Pemberkasan.Models.Master.BerkasVM.Index
+﻿@{
+    ViewData["Title"] = "Kategori Berkas";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+
+            <h2 class="mb-sm-0">Kategori Berkas</h2>
+            <div class="page-title-right">
+                <ol class="breadcrumb m-0">
+                    <li class="breadcrumb-item"><a href="javascript: void(0);">Master</a></li>
+                    <li class="breadcrumb-item active">Kategori Berkas</li>
+                </ol>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="input-group mb-3">
+        <button class="btn btn-primary rounded me-3" type="button" data-bs-toggle="modal" onclick="addKategori()"> <i class="ri-play-list-add-line me-2"></i>Tambah Kategori Berkas</button>
+    </div>
+</div>
+
+
+
+
+<!-- end page title -->
+<div class="card mt-2">
+    <div class="card-body table-responsive">
+        <!-- Striped Rows -->
+        <div class="table-responsive">
+            <table id="tbl" class="w-100 table table-bordered dt-responsive nowrap table-striped table-hover align-middle dataTable no-footer dtr-inline collapsed">
+                <thead>
+                    <tr>
+                        <th class="text-center" scope="col">No.</th>
+                        <th class="text-center" scope="col">Bidang</th>
+                        <th class="text-center" scope="col">Kategori Berkas</th>
+                        <th class="text-center col-3" scope="col">Kelengkapan Dokumen</th>
+                        <th class="text-center " scope="col" >Status</th>
+                        <th class="text-center" scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var (item , index) in Model.BerkasList.Select((value, i) => (value, i + 1)))
+                    {
+                        <tr>
+                            <td class="text-center">@index</td>
+                            <td>@item.IdBidangNavigation.Singkatan</td>
+                            <td>@item.JenisKategoriBerkas</td>
+                            <td>
+                                <div class="d-flex flex-wrap align-midle">
+                                    @foreach (var dok in item.MFormDokumen)
+                                    {
+                                        <span class="badge bg-info me-2 my-1">@dok.IdDokumenNavigation.NamaDokumen</span>
+                                    }
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center">
+                                @if (item.StatusKategoriBerkas == 1)
+                                {
+                                    <div class="d-flex">
+                                        <span class="badge bg-success">Active</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="d-flex">
+                                        <span class="badge bg-danger">Non-Active</span>
+                                    </div>
+                                }
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    <button class="btn btn-secondary me-3" onclick="Edit('@item.IdKategoriBerkas')"><div><i class="las la-edit"></i></div>Edit</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@* Form Tambah Kategori *@
+@* <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Form Upload Dokumen</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="input-group">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Permohonan PBB</a></li>
+                            <li><a class="dropdown-item" href="#">Pengaduan Reklame</a></li>
+                            <li><a class="dropdown-item" href="#">Permohonan Pajak</a></li>
+                        </ul>
+                        <input type="text" class="form-control" aria-label="Text input with dropdown button">
+                    </div>
+                    <hr>
+                    <hr />
+                    <br />
+
+                   <div class="input-group">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Active</a></li>
+                            <li><a class="dropdown-item" href="#">Non-Active</a></li>
+                        </ul>
+                        <input type="text" class="form-control" aria-label="Text input with dropdown button">
+                    </div>>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Submit</button>
+            </div>
+        </div>
+    </div>
+</div> *@
+
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+
+            $("#kellberActive").addClass('active')
+            $('#tbl').DataTable({
+                responsive:true
+            });
+          
+        });
+        function addKategori() {
+            $.ajax({
+                type: "GET",
+                url: '@Url.Action("Add", "KelolaBerkas")',
+                success: function (data) {
+                    $("#staticBackdrop .modal-dialog").addClass("modal-md");
+                    $("#staticBackdrop .modal-title").html("Form Tambah Kategori");
+                    $("#staticBackdrop .modal-body").html(data);
+                    $("#staticBackdrop").modal('show');
+                }
+            });
+        }
+        function Edit(id) {
+            $.ajax({
+                type: "GET",
+                data: { id: id },
+                url: '@Url.Action("Edit")',
+                success: function (data) {
+                    if (data.Status === undefined) {
+                        $("#staticBackdrop .modal-title").html("Edit");
+                        $("#staticBackdrop .modal-body").html(data);
+                        $("#staticBackdrop").modal('show');
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: data.Message
+                        })
+                    }
+                }
+            });
+        }
+
+        function detailDokumen(id_berkas) {
+            $.ajax({
+                type: "GET",
+                data: { IdKategoriBerkas: id_berkas },
+                url: '@Url.Action("DetailDokumen", "KelolaBerkas")',
+                success: function (data) {
+                    if (data.Status === undefined) {
+                        $("#staticBackdrop .modal-dialog").addClass("modal-lg");
+                        $("#staticBackdrop .modal-title").html("Detail Kategori Berkas");
+                        $("#staticBackdrop .modal-body").html(data);
+                        $("#staticBackdrop").modal('show');
+                    }
+                    else {
+                        swal.fire({
+                            icon: 'warning',
+                            title: '<b style="color:orange">Peringatan</b>',
+                            text: data.Message
+                        })
+                    }
+                }
+            });
+        }
+    </script>
+}
